@@ -1,0 +1,38 @@
+[
+  {
+    "Brand": "Apple",
+    "Model": "Iphone 12",
+    "Price": 40000,
+    "Camera": "12 MP",
+    "Display": "6.1 Inches",
+    "Storage": "128GB",
+    "Video": "4K",
+    "Color": "Blue",
+    "Face ID": "Yes",
+    "Audio ID": "No"
+  },
+  {
+    "Brand": "Samsung",
+    "Model": "S20",
+    "Price": 60000,
+    "Camera": "12 MP",
+    "Display": "6.1 Inches",
+    "Storage": "128GB",
+    "Video": "4K",
+    "Color": "Blue",
+    "Face ID": "Yes",
+    "Audio ID": "No"
+  },
+  {
+    "Brand": "Oneplus",
+    "Model": "Nord",
+    "Price": 20000,
+    "Camera": "12 MP",
+    "Display": "6.1 Inches",
+    "Storage": "128GB",
+    "Video": "4K",
+    "Color": "Blue",
+    "Face ID": "Yes",
+    "Audio ID": "No"
+  }
+]

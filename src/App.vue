@@ -1,26 +1,37 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="app" class="container">
+    <h1 class="pageHeading">Smartphone Table</h1>
+    <SmartphoneTable />
+  </div>
 </template>
 
+<style>
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-top: 20px; /* Optional: Add some top margin for spacing */
+  background-color: white; /* Updated background color */
+}
+</style>
+
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import SmartphoneTable from './components/ResponsiveTable.vue';
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
-  }
-}
+    SmartphoneTable,
+  },
+};
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+.pageHeading{
+  font-weight: 800;
+  font-size: 60px;
+  color: #3A1303;
 }
 </style>
