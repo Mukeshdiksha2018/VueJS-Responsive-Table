@@ -87,19 +87,19 @@
   .smartphone-table th {
     font-weight: bold;
     color: white; /* Updated text color for table heading */
-    background-color: #664545; /* Updated background color for table heading */
+    background-color: #333333; /* Updated background color for table heading */
     border-top: 2px solid #ddd;
   }
   
   .smartphone-table tbody .table-row {
-    background-color: #94524A; /* Updated background color for table rows */
+    background-color: #466964; /* Updated background color for table rows */
     color: white; /* Updated text color for table rows */
     transition: transform 0.3s; /* Added transition for the transform property */
   }
   
   .smartphone-table tbody .table-row:hover {
     transform: translateZ(10px); /* Added translation along the z-axis for the 3D effect */
-    background-color: #A27E6F; /* Updated hover background color for table rows */
+    background-color: #3c4e4b; /* Updated hover background color for table rows */
   }
   
   .smartphone-table td {

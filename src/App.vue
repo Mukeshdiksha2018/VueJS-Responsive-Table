@@ -32,6 +32,6 @@ export default {
 .pageHeading{
   font-weight: 800;
   font-size: 60px;
-  color: #3A1303;
+  color: #333333;
 }
 </style>
