@@ -1,130 +1,184 @@
 <template>
-    <div>
-      <table class="smartphone-table">
-        <thead>
-          <tr>
-            <th class="heading" v-show="isColumnVisible('Brand')">Brand <button class="toggle-button" @click="toggleColumnVisibility('Brand')">{{ isColumnVisible('Brand') ? 'Hide' : 'Show' }}</button></th>
-          <th class="heading" v-show="isColumnVisible('Model')">Model <button class="toggle-button" @click="toggleColumnVisibility('Model')">{{ isColumnVisible('Model') ? 'Hide' : 'Show' }}</button></th>
-          <th class="heading" v-show="isColumnVisible('Price')">Price <button class="toggle-button" @click="toggleColumnVisibility('Price')">{{ isColumnVisible('Price') ? 'Hide' : 'Show' }}</button></th>
-          <th class="heading" v-show="isColumnVisible('Camera')">Camera <button class="toggle-button" @click="toggleColumnVisibility('Camera')">{{ isColumnVisible('Camera') ? 'Hide' : 'Show' }}</button></th>
-          <th class="heading" v-show="isColumnVisible('Display')">Display <button class="toggle-button" @click="toggleColumnVisibility('Display')">{{ isColumnVisible('Display') ? 'Hide' : 'Show' }}</button></th>
-          <th class="heading" v-show="isColumnVisible('Storage')">Storage <button class="toggle-button" @click="toggleColumnVisibility('Storage')">{{ isColumnVisible('Storage') ? 'Hide' : 'Show' }}</button></th>
-          <th class="heading" v-show="isColumnVisible('Video')">Video <button class="toggle-button" @click="toggleColumnVisibility('Video')">{{ isColumnVisible('Video') ? 'Hide' : 'Show' }}</button></th>
-          <th class="heading" v-show="isColumnVisible('Color')">Color <button class="toggle-button" @click="toggleColumnVisibility('Color')">{{ isColumnVisible('Color') ? 'Hide' : 'Show' }}</button></th>
-          <th class="heading" v-show="isColumnVisible('Face ID')">Face ID <button class="toggle-button" @click="toggleColumnVisibility('Face ID')">{{ isColumnVisible('Face ID') ? 'Hide' : 'Show' }}</button></th>
-          <th class="heading" v-show="isColumnVisible('Audio ID')">Audio ID <button class="toggle-button" @click="toggleColumnVisibility('Audio Id')">{{ isColumnVisible('Audio ID') ? 'Hide' : 'Show' }}</button></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="phone in smartphones" :key="phone.Model" class="table-row">
-            <td v-show="isColumnVisible('Brand')">{{ phone.Brand }}</td>
-            <td v-show="isColumnVisible('Model')">{{ phone.Model }}</td>
-            <td v-show="isColumnVisible('Price')">{{ phone.Price }}</td>
-            <td v-show="isColumnVisible('Camera')">{{ phone.Camera }}</td>
-            <td v-show="isColumnVisible('Display')">{{ phone.Display }}</td>
-            <td v-show="isColumnVisible('Storage')">{{ phone.Storage }}</td>
-            <td v-show="isColumnVisible('Video')">{{ phone.Video }}</td>
-            <td v-show="isColumnVisible('Color')">{{ phone.Color }}</td>
-            <td v-show="isColumnVisible('Face ID')">{{ phone['Face ID'] }}</td>
-            <td v-show="isColumnVisible('Audio ID')">{{ phone['Audio ID'] }}</td>
-          </tr>
-        </tbody>
-      </table>
+  <div>
+    <div class="button-container">
+      <div
+        v-for="(buttonName, index) in buttonNames"
+        :key="index"
+        :class="['button', buttonName === 'Brand' ? 'draggable' : '', selectedColumns.includes(buttonName) ? 'selected' : '']"
+        @dragstart="handleDragStart(buttonName)"
+        draggable="true"
+        @click="toggleColumn(buttonName)"
+      >
+        {{ buttonName }}
+      </div>
     </div>
-  </template>
-  
- 
-  
-  <script>
- import data from '../assets/smartphonetabledata.json';
-  
-  export default {
-    name: 'SmartphoneTable',
-    data() {
-      return {
-        smartphones: data,
-        columnVisibility: {
-        Brand: true,
-        Model: true,
-        Price: true,
-        Camera: true,
-        Display: true,
-        Storage: true,
-        Video: true,
-        Color: true,
-        'Face ID': true,
-        'Audio ID': true
-      }
-      };
+
+    <div class="drop-zone" @dragover.prevent @drop="handleDrop">
+      <template v-if="showTable">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th
+                v-for="column in selectedColumns"
+                :key="column"
+                class="table-heading"
+              >
+                {{ column }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in filteredData" :key="index">
+              <td v-for="column in selectedColumns" :key="column">
+                {{ item[column] }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </template>
+      <div v-else class="placeholder-text">Drop buttons here to create a table</div>
+    </div>
+  </div>
+</template>
+
+<script>
+import jsonData from '../assets/smartphonetabledata.json';
+
+export default {
+  data() {
+    return {
+      buttonNames: [
+        "Brand",
+        "Model",
+        "Price",
+        "Camera",
+        "Display",
+        "Storage",
+        "Video",
+        "Color",
+        "Face ID",
+        "Audio ID"
+      ],
+      columnSequence: [
+        "Brand",
+        "Model",
+        "Price",
+        "Camera",
+        "Display",
+        "Storage",
+        "Video",
+        "Color",
+        "Face ID",
+        "Audio ID"
+      ],
+      selectedColumns: [],
+      filteredData: [],
+      showTable: false
+    };
+  },
+  methods: {
+    handleDragStart(buttonName) {
+      event.dataTransfer.setData("text/plain", buttonName);
     },
-    methods: {
-      isColumnVisible(columnName) {
-        return this.columnVisibility[columnName];
-      },
-      toggleColumnVisibility(columnName) {
-        this.columnVisibility[columnName] = !this.columnVisibility[columnName];
+    handleDrop(event) {
+      event.preventDefault();
+      const droppedButton = event.dataTransfer.getData("text/plain");
+      this.toggleColumn(droppedButton);
+    },
+    toggleColumn(buttonName) {
+      if (this.selectedColumns.includes(buttonName)) {
+        // Remove the column
+        this.selectedColumns = this.selectedColumns.filter(
+          (column) => column !== buttonName
+        );
+      } else {
+        // Add the column
+        this.selectedColumns.push(buttonName);
       }
+      this.selectedColumns.sort((a, b) => {
+        return (
+          this.columnSequence.indexOf(a) - this.columnSequence.indexOf(b)
+        );
+      });
+      this.filteredData = jsonData.map((item) =>
+        this.selectedColumns.reduce((filteredItem, column) => {
+          filteredItem[column] = item[column];
+          return filteredItem;
+        }, {})
+      );
+      this.showTable = this.selectedColumns.length > 0;
     }
-  };
-  </script>
-  
+  }
+};
+</script>
 
-
-
-  <style>
-  .smartphone-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .smartphone-table th,
-  .smartphone-table td {
-    padding: 20px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-  }
-  
-  .smartphone-table th {
-    font-weight: bold;
-    color: white; /* Updated text color for table heading */
-    background-color: #333333; /* Updated background color for table heading */
-    border-top: 2px solid #ddd;
-  }
-  
-  .smartphone-table tbody .table-row {
-    background-color: #466964; /* Updated background color for table rows */
-    color: white; /* Updated text color for table rows */
-    transition: transform 0.3s; /* Added transition for the transform property */
-  }
-  
-  .smartphone-table tbody .table-row:hover {
-    transform: translateZ(10px); /* Added translation along the z-axis for the 3D effect */
-    background-color: #3c4e4b; /* Updated hover background color for table rows */
-  }
-  
-  .smartphone-table td {
-    border-top: 1px solid #ddd;
-  }
-  
-  .smartphone-table td:first-child,
-  .smartphone-table th:first-child {
-    border-left: 1px solid #ddd;
-  }
-  
-  .smartphone-table td:last-child,
-  .smartphone-table th:last-child {
-    border-right: 1px solid #ddd;
-  }
-
-  .toggle-button {
-  display: inline-block;
-  margin-left: 5px;
-  font-size: 12px;
-  padding: 2px 5px;
-  background-color: #ccc;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
+<style>
+.button-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: absolute;
+  left: 0;
 }
 
-  </style>
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  background-color: #1C7076;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
+  transition: transform 0.3s;
+  margin-bottom: 10px;
+}
+
+.button:hover {
+  transform: scale(1.2);
+}
+
+.draggable {
+  cursor: move;
+}
+
+.selected {
+  background-color: #A74A4A;
+}
+
+.drop-zone {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px dashed #ccc;
+  background-color: #f5f5f5;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  padding: 8px;
+  border: 1px solid #ccc;
+  background-color: #1C7076;
+  color: white;
+  font-size: 20px;
+}
+
+.data-table td {
+  padding: 8px;
+  border: 1px solid #ccc;
+  background-color: #E8E8DF;
+}
+
+.placeholder-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 18px;
+  color: #999;
+}
+</style>
