@@ -1,184 +1,130 @@
 <template>
   <div>
-    <div class="button-container">
-      <div
-        v-for="(buttonName, index) in buttonNames"
-        :key="index"
-        :class="['button', buttonName === 'Brand' ? 'draggable' : '', selectedColumns.includes(buttonName) ? 'selected' : '']"
-        @dragstart="handleDragStart(buttonName)"
-        draggable="true"
-        @click="toggleColumn(buttonName)"
-      >
-        {{ buttonName }}
-      </div>
-    </div>
-
-    <div class="drop-zone" @dragover.prevent @drop="handleDrop">
-      <template v-if="showTable">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th
-                v-for="column in selectedColumns"
-                :key="column"
-                class="table-heading"
+    <div v-for="(value, key) in jsonData[0]" :key="key" class="table-wrapper">
+      <table class="custom-table custom-table--large">
+        <thead>
+          <tr>
+            <th>
+              <div
+                :class="['table-heading-duplicate', { 'active': isHeadingClicked(key) }]"
+                @click="toggleRowVisibility(key)"
               >
-                {{ column }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, index) in filteredData" :key="index">
-              <td v-for="column in selectedColumns" :key="column">
-                {{ item[column] }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </template>
-      <div v-else class="placeholder-text">Drop buttons here to create a table</div>
+                {{ key }}
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in jsonData" :key="index" class="table-row">
+            <td>
+              <div v-show="!isRowHidden(key)" class="slide-content">
+                {{ item[key] }}
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
 
+
+<style>
+.table-wrapper {
+  display: inline-block;
+  overflow-x: auto;
+  white-space: nowrap;
+  margin-right: 10px; /* Adjust the spacing between tables */
+}
+
+
+.custom-table {
+  margin-bottom: 20px;
+  border-collapse: collapse;
+  background-color: #f5f5f5;
+}
+
+
+.custom-table--large {
+  font-size: 20px;
+}
+
+
+.table-heading-duplicate {
+  background-color: #56797c;
+  color: #fff;
+  border: none;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 5px;
+  cursor: pointer;
+}
+
+
+.table-heading-duplicate.active {
+  background-color: #8F5049;
+}
+
+
+.table-row {
+  background-color: #f2f2f2;
+}
+
+
+.table-row:hover {
+  background-color: #e0e0e0;
+}
+
+
+.custom-table--large td {
+  margin: 0 5px; /* Add a 5-pixel gap between each column */
+}
+
+
+.slide-content {
+  padding: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  height: auto;
+  transition: height 1s ease-out;
+}
+
+
+.slide-content[style*="height: 0"] {
+  height: 0;
+}
+</style>
+
+
 <script>
 import jsonData from '../assets/smartphonetabledata.json';
+
 
 export default {
   data() {
     return {
-      buttonNames: [
-        "Brand",
-        "Model",
-        "Price",
-        "Camera",
-        "Display",
-        "Storage",
-        "Video",
-        "Color",
-        "Face ID",
-        "Audio ID"
-      ],
-      columnSequence: [
-        "Brand",
-        "Model",
-        "Price",
-        "Camera",
-        "Display",
-        "Storage",
-        "Video",
-        "Color",
-        "Face ID",
-        "Audio ID"
-      ],
-      selectedColumns: [],
-      filteredData: [],
-      showTable: false
+      jsonData: [],
+      hiddenColumns: {},
+      clickedHeadings: {}
     };
   },
+  mounted() {
+    this.jsonData = jsonData;
+  },
   methods: {
-    handleDragStart(buttonName) {
-      event.dataTransfer.setData("text/plain", buttonName);
+    toggleRowVisibility(column) {
+      this.hiddenColumns[column] = !this.hiddenColumns[column];
+      this.clickedHeadings[column] = !this.clickedHeadings[column];
     },
-    handleDrop(event) {
-      event.preventDefault();
-      const droppedButton = event.dataTransfer.getData("text/plain");
-      this.toggleColumn(droppedButton);
+    isRowHidden(column) {
+      return this.hiddenColumns[column];
     },
-    toggleColumn(buttonName) {
-      if (this.selectedColumns.includes(buttonName)) {
-        // Remove the column
-        this.selectedColumns = this.selectedColumns.filter(
-          (column) => column !== buttonName
-        );
-      } else {
-        // Add the column
-        this.selectedColumns.push(buttonName);
-      }
-      this.selectedColumns.sort((a, b) => {
-        return (
-          this.columnSequence.indexOf(a) - this.columnSequence.indexOf(b)
-        );
-      });
-      this.filteredData = jsonData.map((item) =>
-        this.selectedColumns.reduce((filteredItem, column) => {
-          filteredItem[column] = item[column];
-          return filteredItem;
-        }, {})
-      );
-      this.showTable = this.selectedColumns.length > 0;
+    isHeadingClicked(column) {
+      return this.clickedHeadings[column];
     }
   }
 };
 </script>
-
-<style>
-.button-container {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  position: absolute;
-  left: 0;
-}
-
-.button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 20px;
-  background-color: #1C7076;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  color: white;
-  transition: transform 0.3s;
-  margin-bottom: 10px;
-}
-
-.button:hover {
-  transform: scale(1.2);
-}
-
-.draggable {
-  cursor: move;
-}
-
-.selected {
-  background-color: #A74A4A;
-}
-
-.drop-zone {
-  margin-top: 20px;
-  padding: 20px;
-  border: 1px dashed #ccc;
-  background-color: #f5f5f5;
-}
-
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.data-table th {
-  padding: 8px;
-  border: 1px solid #ccc;
-  background-color: #1C7076;
-  color: white;
-  font-size: 20px;
-}
-
-.data-table td {
-  padding: 8px;
-  border: 1px solid #ccc;
-  background-color: #E8E8DF;
-}
-
-.placeholder-text {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  font-size: 18px;
-  color: #999;
-}
-</style>
