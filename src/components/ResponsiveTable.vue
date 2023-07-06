@@ -1,14 +1,14 @@
 <template>
-  <div>
-    <div v-for="(value, key) in jsonData[0]" :key="key" class="table-wrapper">
-      <table class="custom-table custom-table--large">
+  <div class="table-wrapper">
+    <div v-for="(column, key) in jsonData[0]" :key="key" class="table-column">
+      <table
+        :class="{ 'table-fade-out': selectedTable === key }"
+        class="custom-table custom-table--large"
+      >
         <thead>
           <tr>
-            <th>
-              <div
-                :class="['table-heading-duplicate', { 'active': isHeadingClicked(key) }]"
-                @click="toggleRowVisibility(key)"
-              >
+            <th @click="removeTable(key)">
+              <div class="table-heading-duplicate">
                 {{ key }}
               </div>
             </th>
@@ -16,11 +16,7 @@
         </thead>
         <tbody>
           <tr v-for="(item, index) in jsonData" :key="index" class="table-row">
-            <td>
-              <div v-show="!isRowHidden(key)" class="slide-content">
-                {{ item[key] }}
-              </div>
-            </td>
+            <td>{{ item[key] }}</td>
           </tr>
         </tbody>
       </table>
@@ -28,30 +24,44 @@
   </div>
 </template>
 
-
 <style>
 .table-wrapper {
-  display: inline-block;
+  display: flex;
   overflow-x: auto;
   white-space: nowrap;
-  margin-right: 10px; /* Adjust the spacing between tables */
+  animation: tableFadeIn 1s ease-in-out;
+  position: relative;
+  gap: 0;
 }
 
+@keyframes tableFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.table-column {
+  flex-grow: 1;
+  position: relative;
+  margin-right: 0;
+}
 
 .custom-table {
-  margin-bottom: 20px;
   border-collapse: collapse;
   background-color: #f5f5f5;
 }
-
 
 .custom-table--large {
   font-size: 20px;
 }
 
-
 .table-heading-duplicate {
-  background-color: #56797c;
+  background-color: #56797C;
   color: #fff;
   border: none;
   position: sticky;
@@ -62,69 +72,59 @@
   cursor: pointer;
 }
 
-
-.table-heading-duplicate.active {
-  background-color: #8F5049;
-}
-
-
 .table-row {
   background-color: #f2f2f2;
 }
-
 
 .table-row:hover {
   background-color: #e0e0e0;
 }
 
-
-.custom-table--large td {
-  margin: 0 5px; /* Add a 5-pixel gap between each column */
-}
-
-
-.slide-content {
+td {
   padding: 12px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  height: auto;
-  transition: height 1s ease-out;
 }
 
+.table-fade-out {
+  animation: tableFadeOut 0.5s ease-in-out forwards;
+}
 
-.slide-content[style*="height: 0"] {
-  height: 0;
+@keyframes tableFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
 }
 </style>
 
-
 <script>
 import jsonData from '../assets/smartphonetabledata.json';
-
 
 export default {
   data() {
     return {
       jsonData: [],
-      hiddenColumns: {},
-      clickedHeadings: {}
+      selectedTable: null,
     };
   },
   mounted() {
     this.jsonData = jsonData;
   },
   methods: {
-    toggleRowVisibility(column) {
-      this.hiddenColumns[column] = !this.hiddenColumns[column];
-      this.clickedHeadings[column] = !this.clickedHeadings[column];
+    removeTable(key) {
+      this.selectedTable = key;
+      setTimeout(() => {
+        this.jsonData = this.jsonData.map(item => {
+          const newItem = { ...item };
+          delete newItem[key];
+          return newItem;
+        });
+        this.selectedTable = null;
+      }, 500);
     },
-    isRowHidden(column) {
-      return this.hiddenColumns[column];
-    },
-    isHeadingClicked(column) {
-      return this.clickedHeadings[column];
-    }
-  }
+  },
 };
 </script>
